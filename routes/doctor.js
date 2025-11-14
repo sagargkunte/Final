@@ -56,8 +56,8 @@ doctorRouter.post("/register", async (req, res) => {
       passwordHash,
       phone,
       gender,
-      specialization,
-      location,
+      specialization: specialization.toLowerCase(),
+      location: location.toLowerCase(),
       doctorid,
       status: "pending",
     });

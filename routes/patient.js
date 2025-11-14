@@ -51,6 +51,7 @@ patientRouter.get(
     req.session.patientEmail = req.user.email;
     req.session.patientId = req.user._id;
     req.session.patientName = req.user.name;
+    res.locals.name = req.user.name;
     
 
     res.redirect("/patientPage");
@@ -236,33 +237,31 @@ patientRouter.post('/verify-otp', async (req, res) => {
 });
 
 patientRouter.get('/findNearDoctor', async (req, res) => {
-    const locality = req.query.locality;
-    const specialization = req.query.specialization;
+    // const locality = req.query.locality;
+    // const specialization = req.query.specialization;
 
-    if (!locality || !specialization) {
-        return res.status(400).json({
-            success: false,
-            message: "Please provide locality and specialization"
-        });
-    }
+    // if (!locality || !specialization) {
+    //     return res.status(400).json({
+    //         success: false,
+    //         message: "Please provide locality and specialization"
+    //     });
+    // }
 
     try {
-        const doctors = await doctor.find({
-            location: locality,
-            specialization: specialization,
-            status: "approved"
-        });
+        // const doctors = await doctor.find({
+        //     location: locality,
+        //     specialization: specialization,
+        //     status: "approved"
+        // });
 
-        if (doctors.length === 0) {
-            return res.status(404).json({
-                success: false,
-                message: "No doctors found in your locality with the specified specialization"
-            });
-        }
+        // if (doctors.length === 0) {
+        //     return res.status(404).json({
+        //         success: false,
+        //         message: "No doctors found in your locality with the specified specialization"
+        //     });
+        // }
 
-        res.render('findNearDoctorForm', {
-            doctors
-        });
+        res.render('findNearDoctorForm');
     } catch (error) {
         console.error("Error finding doctors:", error);
         res.status(500).json({
@@ -278,26 +277,36 @@ patientRouter.post('/book-appointment', async (req,res) => {
         const { doctorId, patientName, patientEmail, patientPhone, patientAge, patientGender, patientAddress, urgency, description } = req.body;
         console.log(req.body);
         
-        // Find or create patient
+        // Find or create patient by phone (primary identifier)
         let patientDoc = await patient.findOne({ phone: patientPhone });
         if (!patientDoc) {
             // Generate unique username
             const username = `patient${Date.now()}${Math.floor(Math.random() * 1000)}`;
             
-            patientDoc = await patient.create({
-                username: username, // ✅ ADD THIS LINE
+            const patientData = {
+                username: username,
                 name: patientName,
                 age: patientAge,
                 gender: patientGender,
                 phone: patientPhone,
                 address: patientAddress,
-            });
+            };
+            
+            // Only add email if provided
+            if (patientEmail) {
+                patientData.email = patientEmail;
+            }
+            
+            patientDoc = await patient.create(patientData);
         } else {
             // Update patient info if exists
             patientDoc.name = patientName;
             patientDoc.age = patientAge;
             patientDoc.gender = patientGender;
             patientDoc.address = patientAddress;
+            if (patientEmail) {
+                patientDoc.email = patientEmail;
+            }
             await patientDoc.save();
         }
 
@@ -329,4 +338,48 @@ patientRouter.post('/book-appointment', async (req,res) => {
         });
     }
 })
+
+
+patientRouter.get('/displayDoctors', async (req, res) => {
+    try {
+        const location = req.query.location;
+        const specialization = req.query.specialization;    
+        console.log('Location:', location);
+        console.log('Specialization:', specialization);
+      
+        console.log("Locals Data is ",res.locals);
+        // Build query object
+        const query = { status: "approved" };
+        
+        // Simple exact matching (case-sensitive)
+        if (location && location !== 'all') {
+            query.location = location;
+        }
+        
+        // Simple exact matching (case-sensitive)
+        if (specialization && specialization !== 'all') {
+            query.specialization = specialization;
+        }
+        
+        console.log('Query:', query);
+        
+        const doctorsArray = await doctor.find(query);
+        console.log('Found doctors:', doctorsArray.length);
+        
+        res.render('patient', {
+            doctors: doctorsArray,
+            patientName: res.locals.name,
+
+        });
+        
+    } catch (error) {
+        console.error('Error fetching doctors:', error);
+        res.status(500).render('patient', {
+            doctors: [],
+            patientName: res.local.name || "Patient",
+            error: 'Failed to fetch doctors data'
+        });
+    }
+});
+
 export default patientRouter;
