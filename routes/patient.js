@@ -341,9 +341,8 @@ patientRouter.post('/book-appointment', async (req,res) => {
 
 
 patientRouter.get('/displayDoctors', async (req, res) => {
-    try {
-        const location = req.query.location;
-        const specialization = req.query.specialization;    
+        const location = req.query.location.toLowerCase();
+        const specialization = req.query.specialization.toLowerCase();    
         console.log('Location:', location);
         console.log('Specialization:', specialization);
       
@@ -371,15 +370,7 @@ patientRouter.get('/displayDoctors', async (req, res) => {
             patientName: res.locals.name,
 
         });
-        
-    } catch (error) {
-        console.error('Error fetching doctors:', error);
-        res.status(500).render('patient', {
-            doctors: [],
-            patientName: res.local.name || "Patient",
-            error: 'Failed to fetch doctors data'
-        });
-    }
+    
 });
 
 export default patientRouter;

@@ -64,6 +64,14 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 app.set("view engine", "ejs");
+
+app.use((req, res, next) => {
+    if (req.session.patientName) {
+        res.locals.name = req.session.patientName;
+    }
+  
+    next();
+});
 // app.set("views", path.join(__dirname, "views"));
 
 // Routes
