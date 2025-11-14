@@ -40,20 +40,23 @@ patientRouter.get('/',async (req,res) => {
 
 
 patientRouter.get("/auth/google",
-    passport.authenticate("google",{scope: ["profile","email"],session:false})
-)
+  passport.authenticate("google", { scope: ["profile", "email"] })
+);
 
-patientRouter.get("/auth/google/callback",
-    passport.authenticate("google",{session:false,failureRedirect:"/patientPage"}),
-    (req,res) => {
-        // Set session for Google-authenticated users
-        if (req.user) {
-            req.session.patientEmail = req.user.email;
-            req.session.patientId = req.user.id;
-        }
-        res.redirect("/patientPage");
-    }
-)
+patientRouter.get(
+  "/auth/google/callback",
+  passport.authenticate("google", { failureRedirect: "/patientPage" }),
+  (req, res) => {
+    // Set session for logged-in user
+    req.session.patientEmail = req.user.email;
+    req.session.patientId = req.user._id;
+    req.session.patientName = req.user.name;
+    
+
+    res.redirect("/patientPage");
+  }
+);
+
 
 // Test email configuration endpoint (for debugging)
 patientRouter.get('/test-email-config', async (req, res) => {
@@ -187,11 +190,15 @@ patientRouter.post('/verify-otp', async (req, res) => {
             // Extract name from email (use part before @ as default name)
             const emailName = email.split('@')[0];
             const defaultName = emailName.charAt(0).toUpperCase() + emailName.slice(1);
+                // Generate unique username
+            const defaultUsername = email.split('@')[0] + Math.floor(Math.random() * 10000);
+
             
             // Create new patient with default name
             patientDoc = await patient.create({
                 name: defaultName, // Use email username as default name
                 email: email,
+                username: defaultUsername,
                 verified: "normal"
             });
         }
@@ -228,23 +235,57 @@ patientRouter.post('/verify-otp', async (req, res) => {
     }
 });
 
-patientRouter.get('/findNearDoctor',async (req,res) => {
-    const doctors = await doctor.find({location:"shimoga"})
-    console.log(doctors)
-    res.render('findNearDoctorForm',{
-        doctors
-    });
-})
+patientRouter.get('/findNearDoctor', async (req, res) => {
+    const locality = req.query.locality;
+    const specialization = req.query.specialization;
+
+    if (!locality || !specialization) {
+        return res.status(400).json({
+            success: false,
+            message: "Please provide locality and specialization"
+        });
+    }
+
+    try {
+        const doctors = await doctor.find({
+            location: locality,
+            specialization: specialization,
+            status: "approved"
+        });
+
+        if (doctors.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No doctors found in your locality with the specified specialization"
+            });
+        }
+
+        res.render('findNearDoctorForm', {
+            doctors
+        });
+    } catch (error) {
+        console.error("Error finding doctors:", error);
+        res.status(500).json({
+            success: false,
+            message: "Error finding doctors: " + error.message
+        });
+    }
+});
 
 
 patientRouter.post('/book-appointment', async (req,res) => {
     try {
         const { doctorId, patientName, patientEmail, patientPhone, patientAge, patientGender, patientAddress, urgency, description } = req.body;
-
+        console.log(req.body);
+        
         // Find or create patient
         let patientDoc = await patient.findOne({ phone: patientPhone });
         if (!patientDoc) {
+            // Generate unique username
+            const username = `patient${Date.now()}${Math.floor(Math.random() * 1000)}`;
+            
             patientDoc = await patient.create({
+                username: username, // ✅ ADD THIS LINE
                 name: patientName,
                 age: patientAge,
                 gender: patientGender,
@@ -265,7 +306,7 @@ patientRouter.post('/book-appointment', async (req,res) => {
             doctorid: doctorId,
             patientId: patientDoc._id,
             patientName: patientName,
-            patientEmail: patientEmail || null,
+            patientEmail: patientEmail || "",
             patientPhone: patientPhone,
             patientAge: patientAge,
             patientGender: patientGender,

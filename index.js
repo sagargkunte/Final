@@ -56,7 +56,7 @@ app.use(express.static("public"));
 app.use(express.json());
 app.use(cookieParser());
 app.use(session({
-  secret: process.env.SESSION_SECRET || "your-secret-key-change-in-production",
+  secret: process.env.SESSION_SECRET || "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",
   resave: false,
   saveUninitialized: false,
   cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 } // 24 hours
@@ -74,14 +74,14 @@ app.get("/", (req, res) => {
 
 // Admin Login
 app.post("/admin", async (req, res) => {
-  console.log(req.body);
+ console.log("The admin details are",req.body);
   const { email, password } = req.body;
   const response = await admin.find();
   console.log(response);
   try {
     // const admin = await Admin.findOne({ email });
     // if (!admin) return res.status(404).send("❌ Admin not found!");
-    if (email == "sagar@gmail.com" && password == "asdf") {
+    if (email == "admin@gmail.com" && password == "asdf") {
       res
         .cookie("admin", JSON.stringify(email, password))
         .redirect("/adminPage");

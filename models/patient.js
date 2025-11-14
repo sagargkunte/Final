@@ -7,8 +7,11 @@ const patientSchema = new mongoose.Schema({
   },
   email: {
     type: String,
-    unique: true,
+    // unique: true,
     sparse: true, // Allow multiple nulls
+  },
+    username: {
+    type: String,  // Enforce unique usernames // Each patient must have a username
   },
   age: {
     type: Number,
@@ -27,6 +30,7 @@ const patientSchema = new mongoose.Schema({
     enum:["google","normal"],
     default:"normal"
   }
+  
 });
 
 export const patient = mongoose.model("patient", patientSchema);

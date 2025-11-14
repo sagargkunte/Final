@@ -61,7 +61,7 @@ router.post("/search", async (req, res) => {
 `
         }
       ],
-      model: "llama-4-scout-17b-16e-instruct",
+      model: "llama3.1-8b",
     });
 
     const result = response.choices[0].message.content;

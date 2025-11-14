@@ -40,17 +40,20 @@ router.get('/approve-doctor/:doctorid',async (req,res) => {
     }
 })
 
-
-router.get('/reject-doctor/:doctorid',async (req,res) => {
+router.get('/reject-doctor/:doctorid', async (req, res) => {
     const doctorID = req.params.doctorid;
     try {
-        await doctor.findOneAndUpdate(
-            { doctorid : doctorID }, 
-            { $set: { status: "rejected" } },
-        );
-        res.send("Rejected succesfully");
-    } catch(e) {
-        console.log(e);
+        const deletedDoctor = await doctor.findOneAndDelete({ doctorid: doctorID });
+
+        if (!deletedDoctor) {
+            return res.status(404).send("Doctor not found");
+        }
+
+        res.send("Doctor rejected and deleted successfully");
+    } catch (e) {
+        console.error(e);
+        res.status(500).send("Error while rejecting doctor");
     }
-})
+});
+
 export const adminRouter = router;  
