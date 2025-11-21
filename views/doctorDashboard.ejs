@@ -6,19 +6,112 @@
     <title>Doctor Dashboard - Healthcare Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .glass-effect {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.85);
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+        }
+        
+        .card {
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(31, 38, 135, 0.2);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #6366f1);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #2563eb, #4f46e5);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #10b981, #059669);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-success:hover {
+            background: linear-gradient(135deg, #059669, #047857);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(239, 68, 68, 0.3);
+        }
+        
+        .status-pending {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+        }
+        
+        .status-confirmed {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+        
+        .status-cancelled {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+        }
+        
+        .input-field {
+            transition: all 0.2s ease;
+        }
+        
+        .input-field:focus {
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .border-gradient {
+            border-image: linear-gradient(135deg, #3b82f6, #6366f1) 1;
+        }
+        
+        .profile-picture {
+            transition: all 0.3s ease;
+        }
+        
+        .profile-picture:hover {
+            transform: scale(1.05);
+        }
+    </style>
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body class="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
     <!-- Header -->
-    <header class="bg-white shadow-sm border-b sticky top-0 z-50">
+    <header class="glass-effect shadow-sm border-b border-white/50 sticky top-0 z-50">
         <div class="container mx-auto px-4 py-4">
             <div class="flex justify-between items-center">
                 <div class="flex items-center space-x-3">
-                    <i class="fas fa-user-doctor text-blue-600 text-2xl"></i>
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 flex items-center justify-center">
+                        <i class="fas fa-user-doctor text-white text-xl"></i>
+                    </div>
                     <h1 class="text-2xl font-bold text-gray-800">Doctor Dashboard</h1>
                 </div>
                 <div class="flex items-center space-x-4">
                     <span class="text-gray-700">Welcome, <span class="font-semibold text-blue-600"><%= doctor.name %></span></span>
-                    <button onclick="handleLogout()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition">
+                    <button onclick="handleLogout()" class="btn-danger px-4 py-2 text-white rounded-lg transition">
                         <i class="fas fa-sign-out-alt mr-2"></i>Logout
                     </button>
                 </div>
@@ -30,20 +123,42 @@
         <div class="flex gap-6">
             <!-- Left Sidebar - Profile Button -->
             <div class="w-64">
-                <button onclick="toggleProfile()" class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg shadow-lg flex items-center justify-center transition mb-4">
+                <button onclick="toggleProfile()" class="w-full btn-primary text-white px-4 py-3 rounded-lg shadow-lg flex items-center justify-center transition mb-4">
                     <i class="fas fa-user-circle mr-2"></i>My Profile
                 </button>
+                
+                <!-- Quick Stats -->
+                <div class="glass-effect card rounded-2xl p-4 mb-4">
+                    <h3 class="font-semibold text-gray-800 mb-3">Today's Summary</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-600">Pending Appointments</span>
+                            <span class="bg-yellow-100 text-yellow-800 text-xs font-medium px-2 py-1 rounded-full">
+                                <%= appointments ? appointments.filter(a => a.status === 'pending').length : 0 %>
+                            </span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-600">Confirmed Today</span>
+                            <span class="bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full">
+                                <%= appointments ? appointments.filter(a => a.status === 'confirmed').length : 0 %>
+                            </span>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Main Content -->
             <div class="flex-1">
-                <h2 class="text-2xl font-bold text-gray-800 mb-6">Appointments</h2>
+                <div class="glass-effect card rounded-2xl p-6 mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Appointments</h2>
+                    <p class="text-gray-600">Manage your patient appointments</p>
+                </div>
                 
                 <!-- Appointments List -->
                 <div id="appointmentsList" class="space-y-4">
                     <% if (appointments && appointments.length > 0) { %>
                         <% appointments.forEach(appointment => { %>
-                            <div class="bg-white rounded-lg shadow-md p-6 border-l-4 <%= appointment.status === 'confirmed' ? 'border-green-500' : appointment.status === 'pending' ? 'border-yellow-500' : 'border-gray-500' %>">
+                            <div class="glass-effect card rounded-2xl p-6 border-l-4 <%= appointment.status === 'confirmed' ? 'border-green-500' : appointment.status === 'pending' ? 'border-yellow-500' : 'border-gray-500' %>">
                                 <div class="flex justify-between items-start mb-4">
                                     <div>
                                         <h3 class="text-xl font-semibold text-gray-800"><%= appointment.patientName %></h3>
@@ -54,24 +169,53 @@
                                             <% } %>
                                         </p>
                                     </div>
-                                    <span class="px-3 py-1 rounded-full text-xs font-semibold <%= appointment.status === 'confirmed' ? 'bg-green-100 text-green-800' : appointment.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800' %>">
+                                    <span class="px-3 py-1 rounded-full text-xs font-semibold <%= appointment.status === 'confirmed' ? 'status-confirmed' : appointment.status === 'pending' ? 'status-pending' : 'status-cancelled' %>">
                                         <%= appointment.status.toUpperCase() %>
                                     </span>
                                 </div>
 
                                 <div class="grid grid-cols-2 gap-4 mb-4 text-sm">
                                     <% if (appointment.patientAge) { %>
-                                        <div><i class="fas fa-birthday-cake mr-2 text-blue-600"></i><strong>Age:</strong> <%= appointment.patientAge %></div>
+                                        <div class="flex items-center">
+                                            <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-2">
+                                                <i class="fas fa-birthday-cake text-blue-600 text-xs"></i>
+                                            </div>
+                                            <div>
+                                                <div class="text-gray-500">Age</div>
+                                                <div class="font-medium"><%= appointment.patientAge %></div>
+                                            </div>
+                                        </div>
                                     <% } %>
                                     <% if (appointment.patientGender) { %>
-                                        <div><i class="fas fa-venus-mars mr-2 text-blue-600"></i><strong>Gender:</strong> <%= appointment.patientGender %></div>
+                                        <div class="flex items-center">
+                                            <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-2">
+                                                <i class="fas fa-venus-mars text-blue-600 text-xs"></i>
+                                            </div>
+                                            <div>
+                                                <div class="text-gray-500">Gender</div>
+                                                <div class="font-medium"><%= appointment.patientGender %></div>
+                                            </div>
+                                        </div>
                                     <% } %>
-                                    <div>
-                                        <i class="fas fa-exclamation-triangle mr-2 <%= appointment.urgencyLevel === 'high' ? 'text-red-600' : appointment.urgencyLevel === 'medium' ? 'text-yellow-600' : 'text-green-600' %>"></i>
-                                        <strong>Urgency:</strong> <%= appointment.urgencyLevel.toUpperCase() %>
+                                    <div class="flex items-center">
+                                        <div class="w-8 h-8 rounded-full <%= appointment.urgencyLevel === 'high' ? 'bg-red-100' : appointment.urgencyLevel === 'medium' ? 'bg-yellow-100' : 'bg-green-100' %> flex items-center justify-center mr-2">
+                                            <i class="fas fa-exclamation-triangle <%= appointment.urgencyLevel === 'high' ? 'text-red-600' : appointment.urgencyLevel === 'medium' ? 'text-yellow-600' : 'text-green-600' %> text-xs"></i>
+                                        </div>
+                                        <div>
+                                            <div class="text-gray-500">Urgency</div>
+                                            <div class="font-medium"><%= appointment.urgencyLevel.toUpperCase() %></div>
+                                        </div>
                                     </div>
                                     <% if (appointment.patientAddress) { %>
-                                        <div><i class="fas fa-map-marker-alt mr-2 text-blue-600"></i><strong>Address:</strong> <%= appointment.patientAddress %></div>
+                                        <div class="flex items-center">
+                                            <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-2">
+                                                <i class="fas fa-map-marker-alt text-blue-600 text-xs"></i>
+                                            </div>
+                                            <div>
+                                                <div class="text-gray-500">Address</div>
+                                                <div class="font-medium"><%= appointment.patientAddress %></div>
+                                            </div>
+                                        </div>
                                     <% } %>
                                 </div>
 
@@ -82,11 +226,11 @@
                                 <% } %>
 
                                 <% if (appointment.status === 'pending') { %>
-                                    <button onclick='openConfirmModal("<%= appointment._id %>", "<%= appointment.patientName %>")' class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition">
+                                    <button onclick='openConfirmModal("<%= appointment._id %>", "<%= appointment.patientName %>")' class="btn-success text-white px-4 py-2 rounded-lg transition">
                                         <i class="fas fa-check mr-2"></i>Confirm Appointment
                                     </button>
                                 <% } else if (appointment.status === 'confirmed') { %>
-                                    <div class="bg-green-50 p-3 rounded-lg">
+                                    <div class="bg-green-50 p-4 rounded-lg">
                                         <p class="text-sm"><strong>Time Slot:</strong> <%= appointment.timeSlot %></p>
                                         <% if (appointment.appointmentDate) { %>
                                             <p class="text-sm"><strong>Date:</strong> <%= new Date(appointment.appointmentDate).toLocaleDateString() %></p>
@@ -99,9 +243,12 @@
                             </div>
                         <% }); %>
                     <% } else { %>
-                        <div class="bg-white rounded-lg shadow-md p-8 text-center">
-                            <i class="fas fa-calendar-times text-gray-400 text-5xl mb-4"></i>
+                        <div class="glass-effect card rounded-2xl p-8 text-center">
+                            <div class="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-calendar-times text-blue-600 text-2xl"></i>
+                            </div>
                             <p class="text-gray-600 text-lg">No appointments yet</p>
+                            <p class="text-gray-500 mt-2">New appointments will appear here</p>
                         </div>
                     <% } %>
                 </div>
@@ -111,11 +258,11 @@
 
     <!-- Profile Modal -->
     <div id="profileModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div class="glass-effect rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-white/50">
             <div class="p-6">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-2xl font-bold text-gray-800">My Profile</h2>
-                    <button onclick="toggleProfile()" class="text-gray-500 hover:text-gray-700">
+                    <button onclick="toggleProfile()" class="text-gray-500 hover:text-gray-700 transition-colors">
                         <i class="fas fa-times text-2xl"></i>
                     </button>
                 </div>
@@ -124,8 +271,8 @@
                     <div class="relative inline-block">
                         <img id="profilePictureDisplay" src="<%= doctor.profilePicture || 'https://via.placeholder.com/150' %>" 
                              alt="Profile Picture" 
-                             class="w-32 h-32 rounded-full object-cover border-4 border-blue-600">
-                        <label for="profilePictureInput" class="absolute bottom-0 right-0 bg-blue-600 text-white rounded-full p-2 cursor-pointer hover:bg-blue-700">
+                             class="profile-picture w-32 h-32 rounded-full object-cover border-4 border-gradient">
+                        <label for="profilePictureInput" class="absolute bottom-0 right-0 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full p-2 cursor-pointer hover:from-blue-700 hover:to-indigo-700 transition-all">
                             <i class="fas fa-camera"></i>
                         </label>
                         <input type="file" id="profilePictureInput" accept="image/*" class="hidden" onchange="uploadProfilePicture()">
@@ -133,11 +280,11 @@
                 </div>
 
                 <form id="profileForm" class="space-y-4">
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-gray-700 font-medium mb-2">Full Name</label>
                             <input type="text" id="profileName" value="<%= doctor.name %>" 
-                                   class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                                   class="input-field w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
                         </div>
                         <div>
                             <label class="block text-gray-700 font-medium mb-2">Email</label>
@@ -147,17 +294,17 @@
                         <div>
                             <label class="block text-gray-700 font-medium mb-2">Phone</label>
                             <input type="text" id="profilePhone" value="<%= doctor.phone || '' %>" 
-                                   class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                                   class="input-field w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
                         </div>
                         <div>
                             <label class="block text-gray-700 font-medium mb-2">Specialization</label>
                             <input type="text" id="profileSpecialization" value="<%= doctor.specialization || '' %>" 
-                                   class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                                   class="input-field w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
                         </div>
                         <div>
                             <label class="block text-gray-700 font-medium mb-2">Location</label>
                             <input type="text" id="profileLocation" value="<%= doctor.location || '' %>" 
-                                   class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                                   class="input-field w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
                         </div>
                         <div>
                             <label class="block text-gray-700 font-medium mb-2">Doctor ID</label>
@@ -166,7 +313,7 @@
                         </div>
                     </div>
 
-                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition">
+                    <button type="submit" class="w-full btn-primary text-white font-semibold py-3 rounded-lg transition">
                         <i class="fas fa-save mr-2"></i>Save Changes
                     </button>
                 </form>
@@ -176,35 +323,43 @@
 
     <!-- Confirm Appointment Modal -->
     <div id="confirmModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
+        <div class="glass-effect rounded-2xl shadow-xl max-w-md w-full border border-white/50">
             <div class="p-6">
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-xl font-bold text-gray-800">Confirm Appointment</h2>
-                    <button onclick="closeConfirmModal()" class="text-gray-500 hover:text-gray-700">
+                    <button onclick="closeConfirmModal()" class="text-gray-500 hover:text-gray-700 transition-colors">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
 
-                <p class="text-gray-600 mb-4">Patient: <span id="confirmPatientName" class="font-semibold"></span></p>
+                <div class="flex items-center mb-4">
+                    <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                        <i class="fas fa-user text-blue-600"></i>
+                    </div>
+                    <div>
+                        <p class="text-gray-600">Patient:</p>
+                        <p id="confirmPatientName" class="font-semibold text-gray-800"></p>
+                    </div>
+                </div>
 
                 <form id="confirmForm" class="space-y-4">
                     <input type="hidden" id="confirmAppointmentId">
                     <div>
                         <label class="block text-gray-700 font-medium mb-2">Date</label>
                         <input type="date" id="appointmentDate" required
-                               class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                               class="input-field w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
                     </div>
                     <div>
                         <label class="block text-gray-700 font-medium mb-2">Time Slot</label>
                         <input type="text" id="timeSlot" placeholder="e.g., 10:00 AM - 11:00 AM" required
-                               class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                               class="input-field w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
                     </div>
                     <div>
                         <label class="block text-gray-700 font-medium mb-2">Confirmation Message (optional)</label>
                         <textarea id="confirmationMessage" rows="3" placeholder="Add a message for the patient..."
-                                  class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
+                                  class="input-field w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
                     </div>
-                    <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg transition">
+                    <button type="submit" class="w-full btn-success text-white font-semibold py-3 rounded-lg transition">
                         <i class="fas fa-check mr-2"></i>Confirm Appointment
                     </button>
                 </form>

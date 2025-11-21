@@ -159,6 +159,8 @@ app.post("/sendAppointment", (req, res) => {
 });
 
 
+
+
 app.use('/patientPage',patientRouter);
 
 app.use("/adminPage", adminRouter);

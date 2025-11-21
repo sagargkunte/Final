@@ -6,165 +6,344 @@
   <title>Healthcare Portal</title>
   <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
-      integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
-      crossorigin="anonymous"
-      referrerpolicy="no-referrer"
-    />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
+    integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    
+    .tab-btn {
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+    
+    .tab-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80%;
+      height: 3px;
+      background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+      border-radius: 3px;
+    }
+    
+    .form-container {
+      transition: all 0.4s ease;
+    }
+    
+    .input-field {
+      transition: all 0.2s ease;
+    }
+    
+    .input-field:focus {
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #3b82f6, #6366f1);
+      transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #2563eb, #4f46e5);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
+    }
+    
+    .btn-secondary {
+      background: linear-gradient(135deg, #10b981, #059669);
+      transition: all 0.3s ease;
+    }
+    
+    .btn-secondary:hover {
+      background: linear-gradient(135deg, #059669, #047857);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
+    }
+    
+    .otp-input {
+      letter-spacing: 10px;
+      font-weight: 600;
+    }
+    
+    .glass-effect {
+      backdrop-filter: blur(10px);
+      background: rgba(255, 255, 255, 0.85);
+    }
+    
+    .pulse-animation {
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+      }
+      70% {
+        box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+      }
+    }
+  </style>
 </head>
 
-<body class="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex justify-center items-center p-6">
-  <div class="bg-white shadow-2xl rounded-2xl w-full max-w-md p-8 transition-all duration-300">
+<body class="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex justify-center items-center p-6">
+  <div class="glass-effect shadow-2xl rounded-2xl w-full max-w-md overflow-hidden transition-all duration-300 border border-white/50">
+    <!-- Header with Logo -->
+    <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-center text-white">
+      <div class="flex justify-center mb-4">
+        <div class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
+          <i class="fas fa-heartbeat text-xl"></i>
+        </div>
+      </div>
+      <h1 class="text-2xl font-bold">Healthcare Portal</h1>
+      <p class="text-blue-100 mt-2">Your health, our priority</p>
+    </div>
+    
     <!-- Tabs -->
-    <div class="flex justify-between items-center mb-8 bg-blue-50 p-2 rounded-xl">
+    <div class="flex justify-between items-center p-4 bg-white/80">
       <button id="adminBtn"
-        class="tab-btn flex-1 py-2 text-sm sm:text-base font-semibold text-blue-700 bg-white rounded-lg shadow transition-all duration-200">
-        Admin Login
+        class="tab-btn active flex-1 py-3 text-sm sm:text-base font-semibold text-blue-600 rounded-lg transition-all duration-200">
+        <i class="fas fa-user-shield mr-2"></i>Admin
       </button>
       <button id="doctorBtn"
-        class="tab-btn flex-1 py-2 text-sm sm:text-base font-medium text-gray-600 hover:bg-white hover:shadow rounded-lg transition-all duration-200">
-        Doctor Register
+        class="tab-btn flex-1 py-3 text-sm sm:text-base font-medium text-gray-600 rounded-lg transition-all duration-200">
+        <i class="fas fa-user-md mr-2"></i>Doctor
       </button>
       <button id="patientBtn"
-        class="tab-btn flex-1 py-2 text-sm sm:text-base font-medium text-gray-600 hover:bg-white hover:shadow rounded-lg transition-all duration-200">
-        Patient Register
+        class="tab-btn flex-1 py-3 text-sm sm:text-base font-medium text-gray-600 rounded-lg transition-all duration-200">
+        <i class="fas fa-user-injured mr-2"></i>Patient
       </button>
     </div>
 
-    <!-- Forms -->
-    <!-- Admin Login -->
-    <form id="adminForm" class="space-y-4" action="/admin" method="POST">
-      <h1 class="text-2xl font-semibold text-center text-blue-600 mb-4">Admin Login</h1>
-      <div>
-        <label for="adminEmail" class="block text-gray-700 font-medium mb-1">Email :</label>
-        <input type="email" id="adminEmail" placeholder="Enter your email..."
-          class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none" name="email"/>
-      </div>
-      <div>
-        <label for="adminPassword" class="block text-gray-700 font-medium mb-1">Password :</label>
-        <input type="password" id="adminPassword" placeholder="Enter your password.."
-          class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none" name="password"/>
-      </div>
-      <button
-        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg py-2 transition duration-200">
-        Login
-      </button>
-    </form>
-
-    <!-- Doctor Register -->
-    <form id="doctorForm" class="hidden space-y-4">
-      <h1 class="text-2xl font-semibold text-center text-blue-600 mb-4">Doctor Register</h1>
-      <div id="doctorRegMessage" class="hidden p-3 rounded-lg mb-4"></div>
-      <div>
-        <label for="docName" class="block text-gray-700 font-medium mb-1">Full Name :</label>
-        <input type="text" id="docName" placeholder="Enter your full name" required
-          class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none" name="name"/>
-      </div>
-      <div>
-        <label for="docEmail" class="block text-gray-700 font-medium mb-1">Email :</label>
-        <input type="email" id="docEmail" placeholder="Enter your email" required
-          class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none" name="email"/>
-      </div>
-      <div>
-        <label for="docPassword" class="block text-gray-700 font-medium mb-1">Password :</label>
-        <input type="password" id="docPassword" placeholder="Enter your password" required minlength="6"
-          class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none" name="password"/>
-      </div>
-      <div>
-        <label for="docPhone" class="block text-gray-700 font-medium mb-1">Phone Number :</label>
-        <input type="text" id="docPhone" placeholder="Enter your phone number"
-          class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none" name="phone"/>
-      </div>
-      <div>
-        <label for="Location" class="block text-gray-700 font-medium mb-1">Location :</label>
-        <input type="text" id="Location" placeholder="Enter your Location"
-          class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none" name="location"/>
-      </div>
-      <div>
-        <label for="Specialization" class="block text-gray-700 font-medium mb-1">Specialization :</label>
-        <input type="text" id="Specialization" placeholder="Enter your Specialization"
-          class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none" name="specialization"/>
-      </div>
-       <fieldset class="flex gap-4">
-    <legend class="block text-gray-700 font-medium mb-2">Gender :</legend>
-    <label class="flex items-center text-gray-700 font-medium">
-      <input type="radio" name="gender" class="mr-2 accent-blue-600" value="male" required/> Male
-    </label>
-    <label class="flex items-center text-gray-700 font-medium">
-      <input type="radio" name="gender" class="mr-2 accent-blue-600" value="female" required/> Female
-    </label>
-  </fieldset>
-      <p class="text-sm text-center text-gray-600 mt-4">
-        Already Registered?
-        <a href="/doctorLogin" class="text-blue-600 hover:underline font-medium">Login</a>
-      </p>
-      <button type="submit"
-        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg py-2 transition duration-200">
-        Register
-      </button>
-    </form>
-
-    <!-- Patient Register -->
-    <div id="patientForm" class="hidden space-y-4">
-      <h1 class="text-2xl font-semibold text-center text-blue-600 mb-4">Patient Register</h1>
-      <div id="patientMessage" class="hidden p-3 rounded-lg mb-4"></div>
-      
-      <!-- Step 1: Email Input -->
-      <div id="emailStep">
+    <!-- Forms Container -->
+    <div class="p-6">
+      <!-- Admin Login -->
+      <form id="adminForm" class="form-container space-y-5" action="/admin" method="POST">
+        <h1 class="text-2xl font-bold text-center text-gray-800 mb-2">Admin Login</h1>
+        <p class="text-center text-gray-500 mb-6">Access administrative dashboard</p>
+        
         <div>
-          <label for="patientEmail" class="block text-gray-700 font-medium mb-1">Email Address *</label>
-          <input type="email" id="patientEmail" placeholder="Enter your email ID" required
-            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none"/>
+          <label for="adminEmail" class="block text-gray-700 font-medium mb-2">Email Address</label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <i class="fas fa-envelope text-gray-400"></i>
+            </div>
+            <input type="email" id="adminEmail" placeholder="Enter your email"
+              class="input-field w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-blue-400 focus:outline-none" name="email"/>
+          </div>
         </div>
-        <button type="button" id="sendOtpBtn"
-          class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg py-2 transition duration-200 mt-4">
-          <i class="fas fa-paper-plane mr-2"></i>Send OTP
-        </button>
-      </div>
-
-      <!-- Step 2: OTP Verification -->
-      <div id="otpStep" class="hidden">
+        
         <div>
-          <label for="otpInput" class="block text-gray-700 font-medium mb-1">Enter OTP *</label>
-          <input type="text" id="otpInput" placeholder="Enter 6-digit OTP" maxlength="6" required
-            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none text-center text-2xl tracking-widest"/>
-          <p class="text-xs text-gray-500 mt-2">Check your email for the OTP code</p>
+          <label for="adminPassword" class="block text-gray-700 font-medium mb-2">Password</label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <i class="fas fa-lock text-gray-400"></i>
+            </div>
+            <input type="password" id="adminPassword" placeholder="Enter your password"
+              class="input-field w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-blue-400 focus:outline-none" name="password"/>
+          </div>
         </div>
-        <button type="button" id="verifyOtpBtn"
-          class="w-full bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg py-2 transition duration-200 mt-4">
-          <i class="fas fa-check mr-2"></i>Verify OTP & Register
+        
+        <div class="flex items-center justify-between">
+          <div class="flex items-center">
+            <input type="checkbox" id="rememberMe" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+            <label for="rememberMe" class="ml-2 block text-sm text-gray-700">Remember me</label>
+          </div>
+          <a href="#" class="text-sm text-blue-600 hover:text-blue-800">Forgot password?</a>
+        </div>
+        
+        <button
+          class="btn-primary w-full text-white font-semibold rounded-lg py-3 transition duration-200">
+          <i class="fas fa-sign-in-alt mr-2"></i>Login
         </button>
-        <button type="button" id="resendOtpBtn"
-          class="w-full bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium rounded-lg py-2 transition duration-200 mt-2">
-          <i class="fas fa-redo mr-2"></i>Resend OTP
+      </form>
+
+      <!-- Doctor Register -->
+      <form id="doctorForm" class="form-container hidden space-y-5">
+        <h1 class="text-2xl font-bold text-center text-gray-800 mb-2">Doctor Registration</h1>
+        <p class="text-center text-gray-500 mb-6">Join our medical network</p>
+        
+        <div id="doctorRegMessage" class="hidden p-4 rounded-lg mb-4"></div>
+        
+        <div class="grid grid-cols-1 gap-5">
+          <div>
+            <label for="docName" class="block text-gray-700 font-medium mb-2">Full Name</label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="fas fa-user text-gray-400"></i>
+              </div>
+              <input type="text" id="docName" placeholder="Enter your full name" required
+                class="input-field w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-blue-400 focus:outline-none" name="name"/>
+            </div>
+          </div>
+          
+          <div>
+            <label for="docEmail" class="block text-gray-700 font-medium mb-2">Email Address</label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="fas fa-envelope text-gray-400"></i>
+              </div>
+              <input type="email" id="docEmail" placeholder="Enter your email" required
+                class="input-field w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-blue-400 focus:outline-none" name="email"/>
+            </div>
+          </div>
+          
+          <div>
+            <label for="docPassword" class="block text-gray-700 font-medium mb-2">Password</label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="fas fa-lock text-gray-400"></i>
+              </div>
+              <input type="password" id="docPassword" placeholder="Enter your password" required minlength="6"
+                class="input-field w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-blue-400 focus:outline-none" name="password"/>
+            </div>
+          </div>
+          
+          <div>
+            <label for="docPhone" class="block text-gray-700 font-medium mb-2">Phone Number</label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="fas fa-phone text-gray-400"></i>
+              </div>
+              <input type="text" id="docPhone" placeholder="Enter your phone number"
+                class="input-field w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-blue-400 focus:outline-none" name="phone"/>
+            </div>
+          </div>
+          
+          <div>
+            <label for="Location" class="block text-gray-700 font-medium mb-2">Location</label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="fas fa-map-marker-alt text-gray-400"></i>
+              </div>
+              <input type="text" id="Location" placeholder="Enter your location"
+                class="input-field w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-blue-400 focus:outline-none" name="location"/>
+            </div>
+          </div>
+          
+          <div>
+            <label for="Specialization" class="block text-gray-700 font-medium mb-2">Specialization</label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="fas fa-stethoscope text-gray-400"></i>
+              </div>
+              <input type="text" id="Specialization" placeholder="Enter your specialization"
+                class="input-field w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-blue-400 focus:outline-none" name="specialization"/>
+            </div>
+          </div>
+          
+          <fieldset class="flex gap-6">
+            <legend class="block text-gray-700 font-medium mb-2">Gender</legend>
+            <label class="flex items-center text-gray-700 font-medium">
+              <input type="radio" name="gender" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 mr-2" value="male" required/> Male
+            </label>
+            <label class="flex items-center text-gray-700 font-medium">
+              <input type="radio" name="gender" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 mr-2" value="female" required/> Female
+            </label>
+          </fieldset>
+        </div>
+        
+        <p class="text-sm text-center text-gray-600 mt-4">
+          Already Registered?
+          <a href="/doctorLogin" class="text-blue-600 hover:text-blue-800 font-medium">Login here</a>
+        </p>
+        
+        <button type="submit"
+          class="btn-primary w-full text-white font-semibold rounded-lg py-3 transition duration-200">
+          <i class="fas fa-user-plus mr-2"></i>Register
         </button>
-        <button type="button" id="backToEmailBtn"
-          class="w-full text-blue-600 hover:text-blue-700 font-medium py-2 transition duration-200">
-          <i class="fas fa-arrow-left mr-2"></i>Back to Email
-        </button>
+      </form>
+
+      <!-- Patient Register -->
+      <div id="patientForm" class="form-container hidden space-y-5">
+        <h1 class="text-2xl font-bold text-center text-gray-800 mb-2">Patient Registration</h1>
+        <p class="text-center text-gray-500 mb-6">Get started with your healthcare journey</p>
+        
+        <div id="patientMessage" class="hidden p-4 rounded-lg mb-4"></div>
+        
+        <!-- Step 1: Email Input -->
+        <div id="emailStep">
+          <div>
+            <label for="patientEmail" class="block text-gray-700 font-medium mb-2">Email Address *</label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="fas fa-envelope text-gray-400"></i>
+              </div>
+              <input type="email" id="patientEmail" placeholder="Enter your email ID" required
+                class="input-field w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-blue-400 focus:outline-none"/>
+            </div>
+          </div>
+          
+          <button type="button" id="sendOtpBtn"
+            class="btn-primary w-full text-white font-semibold rounded-lg py-3 transition duration-200 mt-4">
+            <i class="fas fa-paper-plane mr-2"></i>Send OTP
+          </button>
+        </div>
+
+        <!-- Step 2: OTP Verification -->
+        <div id="otpStep" class="hidden">
+          <div class="text-center mb-4">
+            <div class="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center mx-auto mb-3">
+              <i class="fas fa-key text-blue-600 text-xl"></i>
+            </div>
+            <p class="text-gray-600">We've sent a verification code to your email</p>
+            <p class="font-medium text-gray-800 mt-1">${patientEmailValue}</p>
+          </div>
+          
+          <div>
+            <label for="otpInput" class="block text-gray-700 font-medium mb-2">Enter OTP *</label>
+            <input type="text" id="otpInput" placeholder="Enter 6-digit OTP" maxlength="6" required
+              class="otp-input w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-400 focus:outline-none text-center text-xl tracking-widest"/>
+            <p class="text-xs text-gray-500 mt-2 text-center">Check your email for the OTP code</p>
+          </div>
+          
+          <button type="button" id="verifyOtpBtn"
+            class="btn-secondary w-full text-white font-semibold rounded-lg py-3 transition duration-200 mt-4">
+            <i class="fas fa-check mr-2"></i>Verify OTP & Register
+          </button>
+          
+          <button type="button" id="resendOtpBtn"
+            class="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium rounded-lg py-3 transition duration-200 mt-2">
+            <i class="fas fa-redo mr-2"></i>Resend OTP
+          </button>
+          
+          <button type="button" id="backToEmailBtn"
+            class="w-full text-blue-600 hover:text-blue-800 font-medium py-2 transition duration-200">
+            <i class="fas fa-arrow-left mr-2"></i>Back to Email
+          </button>
+        </div>
+
+        <div class="relative my-6">
+          <div class="absolute inset-0 flex items-center">
+            <div class="w-full border-t border-gray-300"></div>
+          </div>
+          <div class="relative flex justify-center text-sm">
+            <span class="px-3 bg-white text-gray-500 font-medium">OR</span>
+          </div>
+        </div>
+
+        <div
+            class="text-center border-2 border-blue-600 bg-white hover:bg-blue-50 py-3 rounded-lg transition cursor-pointer pulse-animation"
+            onclick="GoogleAuth()"
+          >
+            <i class="fa-brands fa-google mr-2 text-blue-600"></i> 
+            <span class="text-blue-600 font-semibold">Login with Google</span>
+          </div>
       </div>
-
-     
-
-      <div class="relative my-4">
-        <div class="absolute inset-0 flex items-center">
-          <div class="w-full border-t border-gray-300"></div>
-        </div>
-        <div class="relative flex justify-center text-sm">
-          <span class="px-2 bg-white text-gray-500 font-medium">OR</span>
-        </div>
-      </div>
-
-      <div
-          class="text-center border-2 border-blue-600 bg-white hover:bg-blue-50 py-2 rounded-lg transition cursor-pointer"
-          onclick="GoogleAuth()"
-        >
-          <i class="fa-brands fa-google mr-2 text-blue-600"></i> 
-          <span class="text-blue-600 font-medium">Login with Google</span>
-        </div>
     </div>
   </div>
 
@@ -184,10 +363,9 @@
     function showForm(index) {
       forms.forEach((form, i) => {
         form.classList.toggle('hidden', i !== index);
-        buttons[i].classList.toggle('bg-white', i === index);
-        buttons[i].classList.toggle('text-blue-700', i === index);
+        buttons[i].classList.toggle('active', i === index);
+        buttons[i].classList.toggle('text-blue-600', i === index);
         buttons[i].classList.toggle('font-semibold', i === index);
-        buttons[i].classList.toggle('shadow', i === index);
         buttons[i].classList.toggle('text-gray-600', i !== index);
         buttons[i].classList.toggle('font-medium', i !== index);
       });
@@ -233,7 +411,7 @@
         const data = await response.json();
         
         if (data.success) {
-          messageDiv.className = 'p-3 rounded-lg mb-4 bg-green-100 border border-green-400 text-green-700';
+          messageDiv.className = 'p-4 rounded-lg mb-4 bg-green-100 border border-green-400 text-green-700';
           messageDiv.textContent = data.message;
           messageDiv.classList.remove('hidden');
           this.reset();
@@ -243,14 +421,14 @@
             window.location.href = '/doctorLogin';
           }, 2000);
         } else {
-          messageDiv.className = 'p-3 rounded-lg mb-4 bg-red-100 border border-red-400 text-red-700';
+          messageDiv.className = 'p-4 rounded-lg mb-4 bg-red-100 border border-red-400 text-red-700';
           messageDiv.textContent = data.message || 'Registration failed. Please try again.';
           messageDiv.classList.remove('hidden');
           submitBtn.disabled = false;
           submitBtn.textContent = originalText;
         }
       } catch (error) {
-        messageDiv.className = 'p-3 rounded-lg mb-4 bg-red-100 border border-red-400 text-red-700';
+        messageDiv.className = 'p-4 rounded-lg mb-4 bg-red-100 border border-red-400 text-red-700';
         messageDiv.textContent = 'Error registering. Please try again.';
         messageDiv.classList.remove('hidden');
         submitBtn.disabled = false;
@@ -269,7 +447,7 @@
       const originalText = btn.innerHTML;
 
       if (!email) {
-        messageDiv.className = 'p-3 rounded-lg mb-4 bg-red-100 border border-red-400 text-red-700';
+        messageDiv.className = 'p-4 rounded-lg mb-4 bg-red-100 border border-red-400 text-red-700';
         messageDiv.textContent = 'Please enter your email address';
         messageDiv.classList.remove('hidden');
         return;
@@ -278,7 +456,7 @@
       // Validate email format
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
-        messageDiv.className = 'p-3 rounded-lg mb-4 bg-red-100 border border-red-400 text-red-700';
+        messageDiv.className = 'p-4 rounded-lg mb-4 bg-red-100 border border-red-400 text-red-700';
         messageDiv.textContent = 'Please enter a valid email address';
         messageDiv.classList.remove('hidden');
         return;
@@ -299,15 +477,21 @@
         const data = await response.json();
 
         if (data.success) {
-          messageDiv.className = 'p-3 rounded-lg mb-4 bg-green-100 border border-green-400 text-green-700';
+          messageDiv.className = 'p-4 rounded-lg mb-4 bg-green-100 border border-green-400 text-green-700';
           messageDiv.textContent = data.message;
           messageDiv.classList.remove('hidden');
           
           // Show OTP step
           document.getElementById('emailStep').classList.add('hidden');
           document.getElementById('otpStep').classList.remove('hidden');
+          
+          // Update email display in OTP step
+          const emailDisplay = document.querySelector('#otpStep p.font-medium');
+          if (emailDisplay) {
+            emailDisplay.textContent = patientEmailValue;
+          }
         } else {
-          messageDiv.className = 'p-3 rounded-lg mb-4 bg-red-100 border border-red-400 text-red-700';
+          messageDiv.className = 'p-4 rounded-lg mb-4 bg-red-100 border border-red-400 text-red-700';
           let errorMsg = data.message || 'Failed to send OTP. Please try again.';
           if (data.details) {
             errorMsg += ' (Error: ' + data.details + ')';
@@ -318,7 +502,7 @@
           btn.innerHTML = originalText;
         }
       } catch (error) {
-        messageDiv.className = 'p-3 rounded-lg mb-4 bg-red-100 border border-red-400 text-red-700';
+        messageDiv.className = 'p-4 rounded-lg mb-4 bg-red-100 border border-red-400 text-red-700';
         messageDiv.textContent = 'Error sending OTP. Please try again.';
         messageDiv.classList.remove('hidden');
         btn.disabled = false;
@@ -334,7 +518,7 @@
       const originalText = btn.innerHTML;
 
       if (!otpCode || otpCode.length !== 6) {
-        messageDiv.className = 'p-3 rounded-lg mb-4 bg-red-100 border border-red-400 text-red-700';
+        messageDiv.className = 'p-4 rounded-lg mb-4 bg-red-100 border border-red-400 text-red-700';
         messageDiv.textContent = 'Please enter a valid 6-digit OTP';
         messageDiv.classList.remove('hidden');
         return;
@@ -357,7 +541,7 @@
         const data = await response.json();
 
         if (data.success) {
-          messageDiv.className = 'p-3 rounded-lg mb-4 bg-green-100 border border-green-400 text-green-700';
+          messageDiv.className = 'p-4 rounded-lg mb-4 bg-green-100 border border-green-400 text-green-700';
           messageDiv.textContent = data.message;
           messageDiv.classList.remove('hidden');
           
@@ -366,7 +550,7 @@
             window.location.href = data.redirectUrl || '/patientPage';
           }, 1500);
         } else {
-          messageDiv.className = 'p-3 rounded-lg mb-4 bg-red-100 border border-red-400 text-red-700';
+          messageDiv.className = 'p-4 rounded-lg mb-4 bg-red-100 border border-red-400 text-red-700';
           messageDiv.textContent = data.message || 'Invalid OTP. Please try again.';
           messageDiv.classList.remove('hidden');
           btn.disabled = false;
@@ -374,7 +558,7 @@
           otpInput.value = '';
         }
       } catch (error) {
-        messageDiv.className = 'p-3 rounded-lg mb-4 bg-red-100 border border-red-400 text-red-700';
+        messageDiv.className = 'p-4 rounded-lg mb-4 bg-red-100 border border-red-400 text-red-700';
         messageDiv.textContent = 'Error verifying OTP. Please try again.';
         messageDiv.classList.remove('hidden');
         btn.disabled = false;
@@ -405,16 +589,16 @@
         const data = await response.json();
 
         if (data.success) {
-          messageDiv.className = 'p-3 rounded-lg mb-4 bg-green-100 border border-green-400 text-green-700';
+          messageDiv.className = 'p-4 rounded-lg mb-4 bg-green-100 border border-green-400 text-green-700';
           messageDiv.textContent = 'New OTP sent successfully! Please check your email.';
           messageDiv.classList.remove('hidden');
         } else {
-          messageDiv.className = 'p-3 rounded-lg mb-4 bg-red-100 border border-red-400 text-red-700';
+          messageDiv.className = 'p-4 rounded-lg mb-4 bg-red-100 border border-red-400 text-red-700';
           messageDiv.textContent = data.message || 'Failed to resend OTP. Please try again.';
           messageDiv.classList.remove('hidden');
         }
       } catch (error) {
-        messageDiv.className = 'p-3 rounded-lg mb-4 bg-red-100 border border-red-400 text-red-700';
+        messageDiv.className = 'p-4 rounded-lg mb-4 bg-red-100 border border-red-400 text-red-700';
         messageDiv.textContent = 'Error resending OTP. Please try again.';
         messageDiv.classList.remove('hidden');
       } finally {

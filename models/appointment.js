@@ -16,6 +16,7 @@ const appointmentSchema = new mongoose.Schema({
     },
     patientEmail: {
         type: String,
+        sparse: true,
     },
     patientPhone: {
         type: String,
