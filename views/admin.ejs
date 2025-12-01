@@ -102,6 +102,47 @@
         box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
       }
     }
+
+    /* Modal scrollbar styling */
+    .modal-content::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    .modal-content::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 4px;
+    }
+    
+    .modal-content::-webkit-scrollbar-thumb {
+      background: #888;
+      border-radius: 4px;
+    }
+    
+    .modal-content::-webkit-scrollbar-thumb:hover {
+      background: #555;
+    }
+
+    /* License preview styles */
+    .license-preview {
+      max-height: 400px;
+      overflow-y: auto;
+      border: 1px solid #e5e7eb;
+      border-radius: 0.5rem;
+      background: #f9fafb;
+    }
+    
+    .pdf-embed {
+      width: 100%;
+      height: 400px;
+      border: none;
+    }
+    
+    .image-preview {
+      max-width: 100%;
+      max-height: 400px;
+      object-fit: contain;
+      border-radius: 0.5rem;
+    }
   </style>
 </head>
 
@@ -218,7 +259,7 @@
           <div class="divide-y divide-gray-200/50">
             <% if (pendingDoctors.length > 0) { %>
               <% pendingDoctors.forEach(doctor => { %>
-                <div class="p-6 hover:bg-blue-50/50 transition-colors duration-200" data-doctor-id="<%= doctor %>">
+                <div class="p-6 hover:bg-blue-50/50 transition-colors duration-200" data-doctor-id="<%= doctor.doctorid %>">
                   <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div class="flex items-start space-x-4">
                       <div class="h-14 w-14 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full flex items-center justify-center">
@@ -231,15 +272,21 @@
                           <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                             <i class="fas fa-user mr-1"></i> <%= doctor.gender || 'Not specified' %>
                           </span>
-                          <% if (doctor.age) { %>
-                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                              <i class="fas fa-birthday-cake mr-1"></i> <%= doctor.age %> years
-                            </span>
-                          <% } %>
+                          <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                            <i class="fas fa-stethoscope mr-1"></i> <%= doctor.specialization || 'Not specified' %>
+                          </span>
+                          <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            <i class="fas fa-hospital mr-1"></i> <%= doctor.hospitalName || 'Not specified' %>
+                          </span>
                           <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium status-pending">
                             <i class="fas fa-clock mr-1"></i> Pending Approval
                           </span>
                         </div>
+                        <% if (doctor.medicalLicenseUrl) { %>
+                          <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 mt-2">
+                            <i class="fas fa-file-medical mr-1"></i> License Uploaded
+                          </span>
+                        <% } %>
                       </div>
                     </div>
                     <div class="flex flex-wrap gap-2">
@@ -295,7 +342,7 @@
             <h2 class="text-lg font-semibold text-gray-800">Quick Actions</h2>
           </div>
           <div class="p-6 space-y-4">
-            <a href="/admin/doctors" class="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-blue-50 transition-colors duration-200">
+            <a href="/adminPage" class="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-blue-50 transition-colors duration-200">
               <div class="flex items-center">
                 <div class="h-10 w-10 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-lg flex items-center justify-center mr-3">
                   <i class="fas fa-user-md text-white"></i>
@@ -398,16 +445,16 @@
     </div>
   </footer>
 
-  <!-- Modal for Doctor Details (hidden by default) -->
+  <!-- Modal for Doctor Details -->
   <div id="doctorModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
-    <div class="glass-effect rounded-2xl shadow-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-white/50">
-      <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-        <h3 class="text-xl font-semibold text-gray-800">Doctor Details</h3>
-        <button id="closeModal" class="text-gray-500 hover:text-gray-700 transition-colors">
+    <div class="glass-effect rounded-2xl shadow-lg w-full max-w-4xl max-h-[90vh] overflow-hidden border border-white/50">
+      <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+        <h3 class="text-xl font-semibold">Doctor Details</h3>
+        <button id="closeModal" class="text-white hover:text-gray-200 transition-colors">
           <i class="fas fa-times text-xl"></i>
         </button>
       </div>
-      <div class="p-6" id="doctorDetails">
+      <div class="p-6 modal-content overflow-y-auto max-h-[calc(90vh-80px)]" id="doctorDetails">
         <!-- Doctor details will be populated here -->
       </div>
     </div>
@@ -415,9 +462,8 @@
 
   <script>
     // Modal functionality
-    function viewDoctor(doctorId) {
-      // In a real application, you would fetch doctor details from your API
-      // For now, we'll show a static message
+    async function viewDoctor(doctorId) {
+      // Show loading state
       document.getElementById('doctorDetails').innerHTML = `
         <div class="space-y-4">
           <div class="flex items-center space-x-4">
@@ -438,50 +484,197 @@
       
       document.getElementById('doctorModal').classList.remove('hidden');
       
-      // Simulate API call to fetch doctor details
-      setTimeout(() => {
-        // This would be replaced with actual data from your API
+      try {
+        // Fetch doctor details from API
+        const response = await fetch(`/adminPage/doctor-details/${doctorId}`);
+        const data = await response.json();
+        
+        if (data.success) {
+          const doctor = data.doctor;
+          renderDoctorDetails(doctor);
+        } else {
+          document.getElementById('doctorDetails').innerHTML = `
+            <div class="text-center py-8">
+              <i class="fas fa-exclamation-triangle text-red-500 text-3xl mb-4"></i>
+              <h3 class="text-lg font-medium text-gray-700">Error Loading Details</h3>
+              <p class="text-gray-500 mt-2">${data.message || 'Could not load doctor details'}</p>
+            </div>
+          `;
+        }
+      } catch (error) {
+        console.error('Error fetching doctor details:', error);
         document.getElementById('doctorDetails').innerHTML = `
-          <div class="space-y-4">
-            <div class="flex items-center space-x-4">
-              <div class="h-20 w-20 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full flex items-center justify-center">
-                <i class="fas fa-user-md text-white text-2xl"></i>
+          <div class="text-center py-8">
+            <i class="fas fa-exclamation-triangle text-red-500 text-3xl mb-4"></i>
+            <h3 class="text-lg font-medium text-gray-700">Error Loading Details</h3>
+            <p class="text-gray-500 mt-2">Network error. Please try again.</p>
+          </div>
+        `;
+      }
+    }
+
+    function renderDoctorDetails(doctor) {
+      const formattedDate = doctor.createdAt ? new Date(doctor.createdAt).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      }) : 'Not available';
+      
+      const licenseUploadedAt = doctor.licenseUploadedAt ? new Date(doctor.licenseUploadedAt).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      }) : 'Not uploaded';
+      
+      // Check if license is PDF or image
+      const licenseUrl = doctor.medicalLicenseUrl;
+      const isPDF = licenseUrl && licenseUrl.toLowerCase().endsWith('.pdf');
+      const isImage = licenseUrl && (licenseUrl.toLowerCase().endsWith('.jpg') || 
+                                   licenseUrl.toLowerCase().endsWith('.jpeg') || 
+                                   licenseUrl.toLowerCase().endsWith('.png'));
+      
+      let licensePreviewHTML = '';
+      if (licenseUrl) {
+        if (isPDF) {
+          licensePreviewHTML = `
+            <div class="mb-4">
+              <h4 class="text-lg font-semibold text-gray-800 mb-2">Medical License Preview</h4>
+              <div class="license-preview">
+                <iframe src="${licenseUrl}" class="pdf-embed"></iframe>
               </div>
-              <div>
-                <h3 class="text-xl font-bold">Doctor ID: ${doctorId}</h3>
-                <p class="text-gray-600">Pending Approval</p>
+              <div class="mt-2 flex items-center space-x-2">
+                <a href="${licenseUrl}" target="_blank" class="text-blue-600 hover:text-blue-800 flex items-center">
+                  <i class="fas fa-external-link-alt mr-1"></i> Open in new tab
+                </a>
+                <span class="text-gray-500">|</span>
+                <a href="${licenseUrl}" download class="text-green-600 hover:text-green-800 flex items-center">
+                  <i class="fas fa-download mr-1"></i> Download PDF
+                </a>
               </div>
             </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700">Status</label>
-                <p class="mt-1"><span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium status-pending">Pending</span></p>
+          `;
+        } else if (isImage) {
+          licensePreviewHTML = `
+            <div class="mb-4">
+              <h4 class="text-lg font-semibold text-gray-800 mb-2">Medical License Preview</h4>
+              <div class="license-preview flex items-center justify-center p-4">
+                <img src="${licenseUrl}" alt="Medical License" class="image-preview">
               </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700">Application Date</label>
-                <p class="mt-1">Just now</p>
+              <div class="mt-2 flex items-center space-x-2">
+                <a href="${licenseUrl}" target="_blank" class="text-blue-600 hover:text-blue-800 flex items-center">
+                  <i class="fas fa-external-link-alt mr-1"></i> Open full image
+                </a>
+                <span class="text-gray-500">|</span>
+                <a href="${licenseUrl}" download class="text-green-600 hover:text-green-800 flex items-center">
+                  <i class="fas fa-download mr-1"></i> Download Image
+                </a>
               </div>
             </div>
-            
-            <div class="border-t pt-4">
-              <p class="text-sm text-gray-500">Full details would be loaded from your database here.</p>
+          `;
+        } else {
+          licensePreviewHTML = `
+            <div class="mb-4">
+              <h4 class="text-lg font-semibold text-gray-800 mb-2">Medical License</h4>
+              <div class="p-4 bg-gray-100 rounded-lg">
+                <p class="text-gray-700">License file uploaded: <a href="${licenseUrl}" target="_blank" class="text-blue-600 hover:text-blue-800">View License</a></p>
+                <p class="text-sm text-gray-500 mt-1">Uploaded on: ${licenseUploadedAt}</p>
+              </div>
+            </div>
+          `;
+        }
+      } else {
+        licensePreviewHTML = `
+          <div class="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <div class="flex items-center">
+              <i class="fas fa-exclamation-triangle text-yellow-500 mr-2"></i>
+              <p class="text-yellow-700">No medical license uploaded</p>
             </div>
           </div>
         `;
-      }, 1000);
+      }
+      
+      document.getElementById('doctorDetails').innerHTML = `
+        <div class="space-y-6">
+          <!-- Doctor Header -->
+          <div class="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-6">
+            <div class="h-24 w-24 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full flex items-center justify-center flex-shrink-0">
+              <i class="fas fa-user-md text-white text-3xl"></i>
+            </div>
+            <div class="flex-1">
+              <h3 class="text-2xl font-bold text-gray-800">Dr. ${doctor.name}</h3>
+              <p class="text-gray-600">${doctor.email}</p>
+              <div class="flex flex-wrap gap-2 mt-2">
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${doctor.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : doctor.status === 'approved' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                  <i class="fas ${doctor.status === 'pending' ? 'fa-clock' : doctor.status === 'approved' ? 'fa-check-circle' : 'fa-times-circle'} mr-1"></i>
+                  ${doctor.status.charAt(0).toUpperCase() + doctor.status.slice(1)}
+                </span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                  <i class="fas fa-id-card mr-1"></i> ID: ${doctor.doctorid}
+                </span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Doctor Information Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-gray-50 p-4 rounded-lg">
+              <label class="block text-sm font-medium text-gray-700 mb-1">Personal Information</label>
+              <p class="text-gray-800"><strong>Gender:</strong> ${doctor.gender || 'Not specified'}</p>
+              <p class="text-gray-800"><strong>Phone:</strong> ${doctor.phone || 'Not specified'}</p>
+            </div>
+            
+            <div class="bg-gray-50 p-4 rounded-lg">
+              <label class="block text-sm font-medium text-gray-700 mb-1">Professional Information</label>
+              <p class="text-gray-800"><strong>Specialization:</strong> ${doctor.specialization || 'Not specified'}</p>
+              <p class="text-gray-800"><strong>Location:</strong> ${doctor.location || 'Not specified'}</p>
+            </div>
+            
+            <div class="bg-gray-50 p-4 rounded-lg">
+              <label class="block text-sm font-medium text-gray-700 mb-1">Hospital Details</label>
+              <p class="text-gray-800"><strong>Hospital Name:</strong> ${doctor.hospitalName || 'Not specified'}</p>
+            </div>
+            
+            <div class="bg-gray-50 p-4 rounded-lg">
+              <label class="block text-sm font-medium text-gray-700 mb-1">Account Information</label>
+              <p class="text-gray-800"><strong>Registered:</strong> ${formattedDate}</p>
+              <p class="text-gray-800"><strong>License Uploaded:</strong> ${licenseUploadedAt}</p>
+            </div>
+          </div>
+          
+          <!-- License Preview -->
+          ${licensePreviewHTML}
+          
+          <!-- Action Buttons -->
+          <div class="flex flex-wrap gap-4 pt-4 border-t">
+            <form action="/adminPage/approve-doctor/${doctor.doctorid}" method="GET" class="inline">
+              <button type="submit" class="btn-success px-6 py-3 text-white rounded-lg transition-colors duration-200 flex items-center">
+                <i class="fas fa-check mr-2"></i> Approve Application
+              </button>
+            </form>
+            <form action="/adminPage/reject-doctor/${doctor.doctorid}" method="GET" class="inline">
+              <button type="submit" class="btn-danger px-6 py-3 text-white rounded-lg transition-colors duration-200 flex items-center">
+                <i class="fas fa-times mr-2"></i> Reject Application
+              </button>
+            </form>
+            <button onclick="closeModal()" class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200 flex items-center">
+              <i class="fas fa-times mr-2"></i> Close
+            </button>
+          </div>
+        </div>
+      `;
     }
 
-    const closeModal = document.getElementById('closeModal');
-    
-    closeModal.addEventListener('click', () => {
+    function closeModal() {
       document.getElementById('doctorModal').classList.add('hidden');
-    });
+    }
+
+    const closeModalBtn = document.getElementById('closeModal');
+    closeModalBtn.addEventListener('click', closeModal);
     
     // Close modal when clicking outside
     document.getElementById('doctorModal').addEventListener('click', (e) => {
       if (e.target === document.getElementById('doctorModal')) {
-        document.getElementById('doctorModal').classList.add('hidden');
+        closeModal();
       }
     });
 
@@ -502,22 +695,21 @@
         }
       });
     });
+    
     // Logout
-        async function handleLogout() {
-            try {
-                const response = await fetch('/admin/logout', {
-                    method: 'POST'
-                });
-                const data = await response.json();
-                if (data.success) {
-                    window.location.href = '/';
-                }
-            } catch (error) {
-                window.location.href = '/';
-            }
+    async function handleLogout() {
+      try {
+        const response = await fetch('/admin/logout', {
+          method: 'POST'
+        });
+        const data = await response.json();
+        if (data.success) {
+          window.location.href = '/';
         }
-
-
+      } catch (error) {
+        window.location.href = '/';
+      }
+    }
   </script>
 </body>
 </html>

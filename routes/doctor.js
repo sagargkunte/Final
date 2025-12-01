@@ -6,20 +6,49 @@ import generateCode from "../services/uniqueID.js";
 import multer from "multer";
 import { v2 as cloudinary } from "cloudinary";
 import { sendAppointmentConfirmationEmail } from '../services/emailService.js';
+import fs from 'fs';
+import path from 'path';
 
 const doctorRouter = Router();
 
-// Configure multer for file uploads
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+// Configure multer for file uploads (temporary storage)
 const storage = multer.diskStorage({
   destination: (req, file, callback) => {
-    callback(null, "public");
+    const uploadDir = 'uploads/';
+    // Create directory if it doesn't exist
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    callback(null, uploadDir);
   },
   filename: (req, file, callback) => {
-    callback(null, Date.now() + "-" + file.originalname);
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    callback(null, uniqueSuffix + '-' + file.originalname);
   },
 });
 
-const upload = multer({ storage: storage });
+const upload = multer({ 
+  storage: storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    // Accept only PDF and image files
+    const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid file type. Only PDF, JPG, and PNG files are allowed.'));
+    }
+  }
+});
 
 // Middleware to check if doctor is logged in
 const isDoctorLoggedIn = (req, res, next) => {
@@ -29,53 +58,133 @@ const isDoctorLoggedIn = (req, res, next) => {
   res.redirect("/doctorLogin");
 };
 
-// Doctor Registration - UPDATED TO INCLUDE HOSPITAL NAME
-doctorRouter.post("/register", async (req, res) => {
+// Doctor Registration - UPDATED TO HANDLE FILE UPLOAD
+doctorRouter.post("/register", upload.single('medicalLicense'), async (req, res) => {
   try {
     const { name, email, password, phone, gender, specialization, location, hospitalName } = req.body;
+
+    // Check if medical license file was uploaded
+    if (!req.file) {
+      // Clean up if there's an uploaded file
+      if (req.file && fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
+      return res.status(400).json({ 
+        success: false, 
+        message: "Medical license file is required" 
+      });
+    }
 
     // Check if doctor already exists
     const existingDoctor = await DoctorModel.findOne({ email });
     if (existingDoctor) {
+      // Clean up uploaded file
+      if (fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
       return res.status(400).json({ 
         success: false, 
         message: "Doctor with this email already exists" 
       });
     }
 
-    // Hash password
-    const saltRounds = 10;
-    const passwordHash = await bcrypt.hash(password, saltRounds);
+    try {
+      // Upload medical license to Cloudinary
+      const cloudinaryResult = await cloudinary.uploader.upload(req.file.path, {
+        folder: "doctor-licenses",
+        resource_type: "auto", // Auto-detect resource type (image or raw for PDF)
+        public_id: `license_${Date.now()}_${email}`,
+        transformation: [
+          { quality: "auto" },
+          { format: "auto" }
+        ]
+      });
 
-    // Generate unique doctor ID
-    const doctorid = generateCode();
+      // Hash password
+      const saltRounds = 10;
+      const passwordHash = await bcrypt.hash(password, saltRounds);
 
-    // Create doctor - INCLUDING HOSPITAL NAME
-    const newDoctor = await DoctorModel.create({
-      name,
-      email,
-      passwordHash,
-      phone,
-      gender,
-      specialization: specialization.toLowerCase(),
-      location: location.toLowerCase(),
-      hospitalName: hospitalName || '', // Add hospital name field
-      doctorid,
-      status: "pending",
-    });
+      // Generate unique doctor ID
+      const doctorid = generateCode();
 
-    res.status(201).json({
-      success: true,
-      message: "Doctor registered successfully! Please wait for admin approval.",
-      doctorId: doctorid,
-    });
+      // Create doctor with Cloudinary URL
+      const newDoctor = await DoctorModel.create({
+        name,
+        email,
+        passwordHash,
+        phone,
+        gender,
+        specialization: specialization.toLowerCase(),
+        location: location.toLowerCase(),
+        hospitalName: hospitalName || '',
+        doctorid,
+        status: "pending",
+        medicalLicenseUrl: cloudinaryResult.secure_url, // Store Cloudinary URL
+        medicalLicensePublicId: cloudinaryResult.public_id, // Store public_id for future management
+        licenseUploadedAt: new Date()
+      });
+
+      // Clean up the temporary file
+      if (fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
+
+      res.status(201).json({
+        success: true,
+        message: "Doctor registered successfully! Please wait for admin approval.",
+        doctorId: doctorid,
+        medicalLicenseUrl: cloudinaryResult.secure_url
+      });
+    } catch (cloudinaryError) {
+      // Clean up temporary file if Cloudinary upload fails
+      if (req.file && fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
+      console.error("Cloudinary upload error:", cloudinaryError);
+      return res.status(500).json({
+        success: false,
+        message: "Error uploading medical license. Please try again.",
+        details: cloudinaryError.message
+      });
+    }
   } catch (error) {
+    // Clean up temporary file if any error occurs
+    if (req.file && fs.existsSync(req.file.path)) {
+      try {
+        fs.unlinkSync(req.file.path);
+      } catch (unlinkError) {
+        console.error("Error cleaning up file:", unlinkError);
+      }
+    }
+    
     console.error("Doctor registration error:", error);
     res.status(500).json({
       success: false,
       message: "Error registering doctor: " + error.message,
     });
   }
+});
+
+// Error handling middleware for multer
+doctorRouter.use((error, req, res, next) => {
+  if (error instanceof multer.MulterError) {
+    if (error.code === 'LIMIT_FILE_SIZE') {
+      return res.status(400).json({
+        success: false,
+        message: "File size is too large. Maximum size is 5MB."
+      });
+    }
+    return res.status(400).json({
+      success: false,
+      message: "File upload error: " + error.message
+    });
+  } else if (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.message
+    });
+  }
+  next();
 });
 
 // Doctor Login
@@ -158,7 +267,8 @@ doctorRouter.get("/dashboard", isDoctorLoggedIn, async (req, res) => {
 doctorRouter.get("/profile", isDoctorLoggedIn, async (req, res) => {
   try {
     const doctorId = req.session.doctorId;
-    const foundDoctor = await DoctorModel.findOne({ doctorid: doctorId }).select("-passwordHash");
+    const foundDoctor = await DoctorModel.findOne({ doctorid: doctorId })
+      .select("-passwordHash");
     
     if (!foundDoctor) {
       return res.status(404).json({ success: false, message: "Doctor not found" });
@@ -209,24 +319,41 @@ doctorRouter.post("/profile/picture", isDoctorLoggedIn, upload.single("profilePi
       });
     }
 
-    // Upload to Cloudinary
-    const cloudinaryRes = await cloudinary.uploader.upload(req.file.path, {
-      folder: "doctor-profiles",
-    });
+    try {
+      // Upload to Cloudinary
+      const cloudinaryRes = await cloudinary.uploader.upload(req.file.path, {
+        folder: "doctor-profiles",
+      });
 
-    // Update doctor profile picture
-    const updatedDoctor = await DoctorModel.findOneAndUpdate(
-      { doctorid: doctorId },
-      { profilePicture: cloudinaryRes.secure_url },
-      { new: true }
-    ).select("-passwordHash");
+      // Update doctor profile picture
+      const updatedDoctor = await DoctorModel.findOneAndUpdate(
+        { doctorid: doctorId },
+        { 
+          profilePicture: cloudinaryRes.secure_url,
+          profilePicturePublicId: cloudinaryRes.public_id
+        },
+        { new: true }
+      ).select("-passwordHash");
 
-    res.json({
-      success: true,
-      message: "Profile picture uploaded successfully",
-      profilePicture: cloudinaryRes.secure_url,
-      doctor: updatedDoctor,
-    });
+      // Clean up temporary file
+      if (fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
+
+      res.json({
+        success: true,
+        message: "Profile picture uploaded successfully",
+        profilePicture: cloudinaryRes.secure_url,
+        doctor: updatedDoctor,
+      });
+    } catch (cloudinaryError) {
+      // Clean up temporary file
+      if (req.file && fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
+      console.error("Cloudinary upload error:", cloudinaryError);
+      throw cloudinaryError;
+    }
   } catch (error) {
     console.error("Profile picture upload error:", error);
     res.status(500).json({

@@ -32,6 +32,10 @@ const doctorSchema = new mongoose.Schema({
     type: String,
     default: null,
   },
+  profilePicturePublicId: {
+    type: String,
+    default: null,
+  },
   doctorid: {
     type: String,
     default: null,
@@ -46,10 +50,34 @@ const doctorSchema = new mongoose.Schema({
   hospitalName: {
     type: String,
     default: ''
+  },
+  // New fields for medical license
+  medicalLicenseUrl: {
+    type: String,
+    default: null
+  },
+  medicalLicensePublicId: {
+    type: String,
+    default: null
+  },
+  licenseUploadedAt: {
+    type: Date,
+    default: null
+  },
+  // Optional: Add verification status for license
+  licenseVerified: {
+    type: Boolean,
+    default: false
+  },
+  // Optional: Add notes or comments about license verification
+  licenseNotes: {
+    type: String,
+    default: ''
   }
+}, {
+  timestamps: true // This will add createdAt and updatedAt fields automatically
 });
 
 console.log("Database created");
-
 
 export const doctor = mongoose.model("doctor", doctorSchema);
